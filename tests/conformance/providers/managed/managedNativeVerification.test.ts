@@ -346,6 +346,42 @@ it("wraps verification in derived workflow Evidence", () => {
   expect(evidence.value.evidence_links).toHaveLength(2);
 });
 
+it("keeps an empty P/Invoke import name from inspection Evidence unresolved", () => {
+  const input = exampleInput();
+  const managed = input.managed_boundaries;
+  const normalized = managedNativeBoundaryInspectionSchema.parse(
+    managed.normalized_result,
+  );
+  const evidence = verifyManagedNativeBoundariesEvidence({
+    ...input,
+    managed_boundaries: createEvidence(undefined, managed.provider, {
+      operation: managed.operation,
+      parameters: managed.parameters,
+      result: {
+        ...normalized,
+        pinvoke_imports: normalized.pinvoke_imports.map((item) => ({
+          ...item,
+          import_name: "",
+        })),
+      },
+      rawResult: null,
+    }),
+  });
+
+  if (!evidence.ok) throw evidence.error;
+  expect(evidence.value.normalized_result).toMatchObject({
+    summary: { verified: 0, unresolved: 1 },
+    pinvoke_imports: [
+      {
+        status: "unresolved",
+        managed: { import_name: "" },
+        matched_native: null,
+        candidates: [],
+      },
+    ],
+  });
+});
+
 describe("managed/native verification result algebra", () => {
   it("rejects states without their required native match", () => {
     const result = verifyManagedNativeBoundaries(exampleInput());

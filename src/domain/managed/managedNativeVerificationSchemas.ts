@@ -28,7 +28,7 @@ const pinvokeVerificationContextShape = {
     token: tokenSchema,
     member_token: tokenSchema.nullable(),
     member_name: z.string().nullable(),
-    import_name: z.string().min(1),
+    import_name: z.string(),
     import_scope_name: z.string().nullable(),
     no_mangle: z.boolean(),
     char_set: z.enum(["not-specified", "ansi", "unicode", "auto", "unknown"]),
